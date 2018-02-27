@@ -2,15 +2,15 @@ from django.db import models
 from django.utils import timezone
 
 class User(models.Model):
-    user_id = models.IntegerField(unique=True)
+    id = models.CharField(max_length=7, primary_key=True)
     name = models.CharField(max_length=64)
 
-class Trades(models.Model):
+class Trade(models.Model):
     TRADE_TYPES = (
         ('buy', 'Buy'),
         ('sell', 'Sell')
     )
-    trade_id = models.IntegerField(unique=True)
+    id = models.CharField(max_length=7, primary_key=True)
     type = models.CharField(max_length=4, choices=TRADE_TYPES)
     user = models.ForeignKey(User)
     stock_symbol = models.CharField(max_length=5)
