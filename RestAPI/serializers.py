@@ -9,6 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
 class TradeSerializer(serializers.ModelSerializer):
 
     user = UserSerializer(required=True)
+    # stock_price = serializers.DecimalField(decimal_places=2, max_digits=12, coerce_to_string=False)
 
     class Meta:
         model = Trade
@@ -24,11 +25,11 @@ class TradeSerializer(serializers.ModelSerializer):
         :return: returns a successfully created student record
         """
         user_data = validated_data.pop('user')
-        user = TradeSerializer.create(UserSerializer(), validated_data=user_data)
+        user = UserSerializer.create(UserSerializer(), validated_data=user_data)
         trade, created = Trade.objects.update_or_create(user=user,
                 id=validated_data.pop('id'),
                 type=validated_data.pop('type'),
-                stock_price= validated_data.pop('stock_price'),
+                stock_price=validated_data.pop('stock_price'),
                 stock_quantity=validated_data.pop('stock_quantity'),
                 stock_symbol=validated_data.pop('stock_symbol'))
         return trade

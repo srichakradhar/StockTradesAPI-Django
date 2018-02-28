@@ -10,21 +10,22 @@ from datetime import datetime, timedelta
 
 @csrf_exempt
 def trades(request):
+    
     if request.method == "POST":
         new_trade = json.loads(request.body.decode('utf-8'))
 
         user, created = User.objects.get_or_create(id=new_trade['user']['id'], name=new_trade['user']['name'])
-        try:
-            Trade.objects.get(trade_id=int(new_trade['id']))
+        trade, created =Trade.objects.get_or_create(id=new_trade['id'], type=new_trade['type'], stock_price= new_trade['stock_price'],
+            stock_quantity=new_trade['stock_quantity'], stock_symbol=new_trade['stock_symbol'],
+            user=user, trade_timestamp=datetime.strptime(new_trade['trade_timestamp'], "%Y-%m-%d %H:%M:%S").replace(tzinfo=UTC))
+        
+        if not created:
             # trade id already exists. Send 400 response status
             return JsonResponse({}, status=400)
-        except:
-            # Send 201 response status
-            Trade(id=new_trade['id'], type=new_trade['type'], stock_price= new_trade['stock_price'],
-            stock_quantity=new_trade['stock_quantity'], stock_symbol=new_trade['stock_symbol'],
-            user=user, trade_timestamp=datetime.strptime(new_trade['trade_timestamp'], "%Y-%m-%d %H:%M:%S").replace(tzinfo=UTC)).save()
 
+        # Send 201 response status
         return JsonResponse({}, status=201)
+
     else:
         tradeSerializer = TradeSerializer(Trade.objects.all().order_by('id'), many=True)
         return JsonResponse(tradeSerializer.data, safe=False)
@@ -63,5 +64,6 @@ def stock_price(request, symbol):
 
 @csrf_exempt
 def erase(request):
-    Trade.objects.all().delete()
+    if request.method == 'DELETE':
+        Trade.objects.all().delete()
     return JsonResponse({})
